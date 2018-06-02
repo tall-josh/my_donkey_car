@@ -1,0 +1,1 @@
+{"inputs": {"image_input": "input:0"}, "outputs": {"steering_prediction": "donkey/steering_prediction:0", "steering_probs": "donkey/steeringi_probs:0", "throttle_prediction": "donkey/throttle/Sigmoid:0"}}

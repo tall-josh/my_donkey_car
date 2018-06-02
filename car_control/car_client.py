@@ -8,12 +8,12 @@ def on_message(client, userdata, msg):
   commands = json.loads(payload)
   s_command = commands["steering"]
   t_command = commands["throttle"]
-  print(f"st: {s_command}, th: {t_command}")
+  print("st: {}, th: {}".format(s_command, t_command))
 
 broker = "localhost"
 client = mqtt.Client("car_client")
 client.on_message=on_message
-print(f"Connecting to broker: {broker}")
+print("Connecting to broker: {}".format(broker))
 client.connect(broker)
 client.loop_start()
 client.subscribe("inference/control")
@@ -24,5 +24,5 @@ while True:
   except KeyboardInterrupt:
     client.loop_stop()
     client.disconnect()
-    print(f"Fucking off...")
+    print("Fucking off...")
     break

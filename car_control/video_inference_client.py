@@ -5,8 +5,8 @@ import tensorflow as tf
 import json
 import numpy as np
 
-frozen_path = "/home/jp/Documents/FYP/ml/car_control/donkey_brain/frozen.pb"
-tensor_path = "/home/jp/Documents/FYP/ml/car_control/donkey_brain/tensor_names.json"
+frozen_path = "/home/pi/my_donkey_car/frozen_graph/frozen.pb"
+tensor_path = "/home/pi/my_donkey_car/frozen_graph/tensor_names.json"
 _graph = load_graph(frozen_path)
 _tensors = json.load(open(tensor_path, 'r'))
 _image    = _tensors["inputs"]["image_input"]
@@ -26,7 +26,7 @@ def on_message(client, userdata, msg):
 broker = "localhost"
 client = mqtt.Client("video_client")
 #client.on_message=on_message
-print(f"Connecting to broker: {broker}")
+print("Connecting to broker: {}".format(broker))
 client.connect(broker)
 client.loop_start()
 
@@ -44,5 +44,5 @@ while True:
   except KeyboardInterrupt:
     client.loop_stop()
     client.disconnect()
-    print(f"Fucking off...")
+    print("Fucking off...")
     break

@@ -20,9 +20,10 @@ client.subscribe("inference/control")
 
 while True:
   try:
-    time.sleep(0.1)
+    time.sleep(0.01)
   except KeyboardInterrupt:
     client.loop_stop()
     client.disconnect()
-    print("Fucking off...")
+    print("car_client, ;q
+            Fucking off...")
     break

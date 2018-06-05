@@ -1,0 +1,4 @@
+{"NETWORK_INPUT_SHAPE":[1,120,160,3],
+	"NUM_STEERING_BINS": 15,
+	"FROZEN_GRAPH":"/home/pi/my_donkey_car/frozen_graph/frozen.pb",
+	"TENSOR_NAMES":"/home/pi/my_donkey_car/frozen_graph/tensor_names.json"}

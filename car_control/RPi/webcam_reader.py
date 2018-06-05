@@ -7,7 +7,7 @@ import time
 
 NORM = 1. / 255.
 
-with open("config.json", 'r') as f:
+with open("../config.json", 'r') as f:
     CONFIG = json.load(f)
 
 def resize(img, out_size):

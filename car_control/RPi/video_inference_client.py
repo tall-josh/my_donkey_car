@@ -11,7 +11,7 @@ from multiprocessing.managers import BaseManager
 import cv2
 import time
 
-with open("config.json", 'r') as f:
+with open("../config.json", 'r') as f:
   CONFIG = json.load(f)
 
 frozen_path = CONFIG["FROZEN_GRAPH"] 
@@ -34,17 +34,19 @@ with _graph.as_default() as graph:
    print(f"message recieved", m_decode)
 '''
 
-broker = "localhost"
+BROKER        = CONFIG["BROKER_IP"]
+PORT          = CONFIG["BROKER_PORT"]
+TOPIC_CONTROL = CONFIG["TOPIC_CONTROL"]
+
+print("Connecting to broker: {}:{}".format(BROKER, PORT))
+print("Publish topic: '{}'".format(TOPIC_CONTROL))
 client = mqtt.Client("video_client")
 #client.on_message=on_message
-print("Connecting to broker: {}".format(broker))
-client.connect(broker)
+client.connect(BROKER, PORT)
 client.loop_start()
+print("Connected")
 
 def inference_process(frame_buffer, write_target):
-  print("INFERENCE")
-  count = 0
-  t1 = time.time()
   while True:
     # Toggle write_target, ie: now it's the read target
     write_target.value = not write_target.value
@@ -52,7 +54,6 @@ def inference_process(frame_buffer, write_target):
     frame = frame_buffer[write_target.value]
     # reshape and cast before feeding into the NN
     _frame = np.reshape(frame, CONFIG["NETWORK_INPUT_SHAPE"]).astype(np.float32)
-    count += 1
     try:
       # do inference
       with tf.Session(graph=graph) as sess:
@@ -62,15 +63,12 @@ def inference_process(frame_buffer, write_target):
       com_steer = float(com_steer/CONFIG["NUM_STEERING_BINS"])
       com_throt = float(com_throt)
       payload = {"steering": com_steer, "throttle": com_throt}
-      client.publish("inference/control", json.dumps(payload))
+      client.publish(TOPIC_CONTROL, json.dumps(payload))
     except KeyboardInterrupt:
       client.loop_stop()
       client.disconnect()
       print("Fucking off...")
       break
-    if count == 50:
-        print("IPS: {}".format(50. / (time.time()-t1))) 
-        break
 
 
 def main():

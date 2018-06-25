@@ -14,7 +14,7 @@ import time
 with open("../config.json", 'r') as f:
   CONFIG = json.load(f)
 
-frozen_path = CONFIG["FROZEN_GRAPH"] 
+frozen_path = CONFIG["FROZEN_GRAPH"]
 tensor_path = CONFIG["TENSOR_NAMES"]
 
 _graph = load_graph(frozen_path)
@@ -71,6 +71,7 @@ def inference_process(frame_buffer, write_target):
       break
 
 
+
 def main():
     flat_image_shape = np.prod(CONFIG["NETWORK_INPUT_SHAPE"])
     frame_0      = mp.Array('f', np.zeros(flat_image_shape, dtype=np.float32), lock=False)
@@ -85,3 +86,46 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+import numpy as np
+import cv2
+
+cap = cv2.VideoCapture('/home/jp/Documents/FYP/ml/data/videoplayback.mp4')
+
+while(cap.isOpened()):
+    ret, frame = cap.read()
+
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    cv2.imshow('frame',gray)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+def inference_process(frame_buffer, write_target):
+  while True:
+    # Toggle write_target, ie: now it's the read target
+    write_target.value = not write_target.value
+    # read frame from frame_buffer
+    frame = frame_buffer[write_target.value]
+    # reshape and cast before feeding into the NN
+    _frame = np.reshape(frame, CONFIG["NETWORK_INPUT_SHAPE"]).astype(np.float32)
+    try:
+      # do inference
+      with tf.Session(graph=graph) as sess:
+        com_steer, com_throt = sess.run([steering, throttle],
+                               feed_dict={image: _frame})
+      # normalize
+      com_steer = float(com_steer/CONFIG["NUM_STEERING_BINS"])
+      com_throt = float(com_throt)
+      payload = {"steering": com_steer, "throttle": com_throt}
+      client.publish(TOPIC_CONTROL, json.dumps(payload))
+    except KeyboardInterrupt:
+      client.loop_stop()
+      client.disconnect()
+      print("Fucking off...")
+      break

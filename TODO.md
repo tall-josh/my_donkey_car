@@ -1,0 +1,4 @@
+ - Train model in grayscale
+ - Evaluation metrics
+ - Full Readme
+ - Example Notebook
